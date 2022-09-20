@@ -1,0 +1,10 @@
+{
+  "ExpandedNodes": [
+    "",
+    "\\SampleApi",
+    "\\SampleApi\\Controllers",
+    "\\SampleApi\\Services"
+  ],
+  "SelectedNode": "\\SampleApi\\Services\\AuthorRepository.cs",
+  "PreviewInSolutionExplorer": false
+}
