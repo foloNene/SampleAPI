@@ -62,6 +62,9 @@ namespace SampleApi
                 };
             });
 
+            //register PropertyMappingService
+            services.AddTransient<IPropertyMappingService, PropertyMappingService>();
+
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
             services.AddScoped<IBookRepository, BookRepository>();

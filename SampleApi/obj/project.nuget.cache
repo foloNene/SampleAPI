@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "4hjI2y9Vq38tgSR9j42e1TC2b2RTp255QHUMAWKpyIvbdEGqzlu83OMjAMDQiqt6V6yU5LnSiUuWA/CQCNjJhQ==",
+  "dgSpecHash": "yuZK2URCY1HSnhTUGclzlYamuzTYy76f7nnMpCEzOX6BA2EcDdPRV0NUrdTmOjN2IB++KEfQtUEn8jqL6BQ82Q==",
   "success": true,
   "projectFilePath": "C:\\Users\\USER\\Desktop\\Project\\SampleApi\\SampleApi\\SampleApi.csproj",
   "expectedPackageFiles": [
@@ -67,6 +67,7 @@
     "C:\\Users\\USER\\.nuget\\packages\\system.io.filesystem\\4.3.0\\system.io.filesystem.4.3.0.nupkg.sha512",
     "C:\\Users\\USER\\.nuget\\packages\\system.io.filesystem.primitives\\4.3.0\\system.io.filesystem.primitives.4.3.0.nupkg.sha512",
     "C:\\Users\\USER\\.nuget\\packages\\system.linq\\4.3.0\\system.linq.4.3.0.nupkg.sha512",
+    "C:\\Users\\USER\\.nuget\\packages\\system.linq.dynamic.core\\1.0.18\\system.linq.dynamic.core.1.0.18.nupkg.sha512",
     "C:\\Users\\USER\\.nuget\\packages\\system.net.nameresolution\\4.3.0\\system.net.nameresolution.4.3.0.nupkg.sha512",
     "C:\\Users\\USER\\.nuget\\packages\\system.net.primitives\\4.3.0\\system.net.primitives.4.3.0.nupkg.sha512",
     "C:\\Users\\USER\\.nuget\\packages\\system.private.datacontractserialization\\4.3.0\\system.private.datacontractserialization.4.3.0.nupkg.sha512",

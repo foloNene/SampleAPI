@@ -13,10 +13,16 @@ namespace SampleApi.Services
     public class AuthorRepository : IAuthorRepository, IDisposable
     {
         private LibraryContext _context;
+        private readonly IPropertyMappingService _propertyMappingService;
 
-        public AuthorRepository(LibraryContext context)
+
+        public AuthorRepository(LibraryContext context,
+            IPropertyMappingService propertyMappingService)
         {
             _context = context;
+
+            _propertyMappingService = propertyMappingService ??
+               throw new ArgumentNullException(nameof(propertyMappingService));
         }
 
         public async Task<bool> AuthorExistsAsync(Guid authorId)
@@ -59,13 +65,31 @@ namespace SampleApi.Services
             if (!string.IsNullOrWhiteSpace(authorsResourceParameters.SearchQuery))
             {
                var searchQuery = authorsResourceParameters.SearchQuery.Trim();
-
+                 
                 collection = collection.Where(a => a.MainCategory.Contains(searchQuery)
                 //return _context.Authors.Where(a => a.MainCategory.Contains(searchQuery)
                    || a.FirstName.Contains(searchQuery)
                    || a.LastName.Contains(searchQuery));
-              
+
             }
+
+
+            if (!string.IsNullOrWhiteSpace(authorsResourceParameters.OrderBy))
+            {
+                //Not re-useable and for only name parameter.
+                //if (authorsResourceParameters.OrderBy.ToLowerInvariant() == "name")
+                //{
+                //    collection = collection.OrderBy(a => a.FirstName).ThenBy(a => a.LastName);
+                //}
+
+                //Mapping Dictionary to sort
+                var authorPropertyMappingDictionary =
+                   _propertyMappingService.GetPropertyMapping<Models.AuthorDto, Author>();
+
+                collection = collection.ApplySort(authorsResourceParameters.OrderBy,
+                    authorPropertyMappingDictionary);
+            }
+
             //return await _context.Authors.ToListAsync();
 
             return PagedList<Author>.Create(collection,
