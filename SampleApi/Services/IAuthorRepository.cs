@@ -1,4 +1,5 @@
 ﻿using SampleApi.Entities;
+using SampleApi.Helpers;
 using SampleApi.ResourceParameters;
 using System;
 using System.Collections.Generic;
@@ -15,7 +16,8 @@ namespace SampleApi.Services
         //For authorcollection
         IEnumerable<Author> GetAuthors(IEnumerable<Guid> authorIds);
 
-        Task<IEnumerable<Author>> GetAuthorsAsync(AuthorsResourceParameters authorsResourceParameters);
+        PagedList<Author> GetAuthors(AuthorsResourceParameters authorsResourceParameters);
+        // Task<IEnumerable<Author>> GetAuthorsAsync(AuthorsResourceParameters authorsResourceParameters);
 
         Task<Author> GetAuthorAsync(Guid authorId);
 

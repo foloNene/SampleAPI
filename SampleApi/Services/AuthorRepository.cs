@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SampleApi.Contexts;
 using SampleApi.Entities;
+using SampleApi.Helpers;
 using SampleApi.ResourceParameters;
 using System;
 using System.Collections.Generic;
@@ -30,7 +31,7 @@ namespace SampleApi.Services
         }
 
         //Filtering and Searching
-        public async Task<IEnumerable<Author>> GetAuthorsAsync(AuthorsResourceParameters authorsResourceParameters)
+        public PagedList<Author> GetAuthors(AuthorsResourceParameters authorsResourceParameters)
         {
 
             if (authorsResourceParameters == null)
@@ -38,11 +39,11 @@ namespace SampleApi.Services
                 throw new ArgumentNullException(nameof(authorsResourceParameters));
             }
 
-            if (string.IsNullOrWhiteSpace(authorsResourceParameters.MainCategory)
-                && string.IsNullOrWhiteSpace(authorsResourceParameters.SearchQuery))
-            {
-                return await _context.Authors.ToListAsync();
-            }
+            //if (string.IsNullOrWhiteSpace(authorsResourceParameters.MainCategory)
+            //    && string.IsNullOrWhiteSpace(authorsResourceParameters.SearchQuery))
+            //{
+            //    return await _context.Authors.ToListAsync();
+            //}
 
             var collection =  _context.Authors as IQueryable<Author>;
 
@@ -67,7 +68,9 @@ namespace SampleApi.Services
             }
             //return await _context.Authors.ToListAsync();
 
-            return collection.ToList();
+            return PagedList<Author>.Create(collection,
+                authorsResourceParameters.PageNumber,
+                authorsResourceParameters.PageSize);
         }
 
         public async Task<Author> GetAuthorAsync(Guid authorId)
