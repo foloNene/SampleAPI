@@ -32,7 +32,7 @@ namespace SampleApi.Controllers
 
         }
 
-        [HttpGet()]
+        [HttpGet(Name = "GetBooksForAuthor")]
         public async Task<ActionResult<IEnumerable<BookDto>>> GetBooks(
         Guid authorId)
         {
@@ -64,7 +64,7 @@ namespace SampleApi.Controllers
             return Ok(_mapper.Map<BookDto>(bookFromRepo));
         }
 
-        [HttpPost()]
+        [HttpPost(Name = "CreateBookForAuthor")]
         public async Task<ActionResult<BookDto>> CreateBookForAuthor(
             Guid authorId, BookForCreationDto book)
         {
