@@ -20,29 +20,42 @@ namespace SampleApi.Controllers
         private readonly IAuthorRepository _authorsRepository;
         private readonly IMapper _mapper;
         private readonly IPropertyMappingService _propertyMappingService;
+        private readonly IPropertyCheckerService _propertyCheckerService;
 
         public AuthorsController(
            IAuthorRepository authorsRepository,
-           IMapper mapper, IPropertyMappingService propertyMappingService)
+           IMapper mapper, IPropertyMappingService propertyMappingService,
+           IPropertyCheckerService propertyCheckerService)
         {
             _authorsRepository = authorsRepository ??
                 throw new ArgumentNullException(nameof(authorsRepository));
             _mapper = mapper ??
                 throw new ArgumentNullException(nameof(mapper));
             _propertyMappingService = propertyMappingService??
-                    throw new ArgumentNullException(nameof(authorsRepository));
+                throw new ArgumentNullException(nameof(propertyMappingService));
+            _propertyCheckerService = propertyCheckerService ??
+                throw new ArgumentNullException(nameof(propertyCheckerService));
+
         }
 
         [HttpGet(Name ="GetAuthors")]
-        public ActionResult<IEnumerable<AuthorDto>> GetAuthors(
+        public IActionResult GetAuthors(
             [FromQuery]AuthorsResourceParameters authorsResourceParameters)
         {
 
+            //Validate data shaping
             if (!_propertyMappingService.ValidMappingExistsFor<AuthorDto, Entities.Author>
                (authorsResourceParameters.OrderBy))
             {
                 return BadRequest();
             }
+
+            //Validate Sorting
+            if (!_propertyCheckerService.TypeHasProperties<AuthorDto>(authorsResourceParameters.Fields))
+            {
+                return BadRequest();
+            }
+
 
             var authorsFromRepo =  _authorsRepository.GetAuthors(authorsResourceParameters);
 
@@ -67,20 +80,28 @@ namespace SampleApi.Controllers
             };
 
             Response.Headers.Add("X-Pagination",
-                JsonSerializer.Serialize(paginationMetadata));
-            return Ok(_mapper.Map<IEnumerable<AuthorDto>>(authorsFromRepo));
+            JsonSerializer.Serialize(paginationMetadata));
+
+            return Ok(_mapper.Map<IEnumerable<AuthorDto>>(authorsFromRepo)
+                .ShapeData(authorsResourceParameters.Fields));
         }
 
         [HttpGet("{authorId}", Name ="GetAuthor")]
-        public async Task<ActionResult<Author>> GetAuthor(Guid authorId)
+        public async Task<ActionResult<Author>> GetAuthor(Guid authorId, string fields)
         {
+            //vALidating the data shaping
+            if (!_propertyCheckerService.TypeHasProperties<AuthorDto>(fields))
+            {
+                return BadRequest();
+            }
+
             var authorFromRepo = await _authorsRepository.GetAuthorAsync(authorId);
             if (authorFromRepo == null)
             {
                 return NotFound();
             }
 
-            return Ok(_mapper.Map<AuthorDto>(authorFromRepo));
+            return Ok(_mapper.Map<AuthorDto>(authorFromRepo).ShapeData(fields));
         }
 
         [HttpPost()]
@@ -123,6 +144,7 @@ namespace SampleApi.Controllers
                     return Url.Link("GetAuthors",
                         new
                         {
+                            fields = authorsResourceParameters.Fields,
                             orderBy = authorsResourceParameters.OrderBy,
                             pageNumber = authorsResourceParameters.PageNumber - 1,
                             pageSize = authorsResourceParameters.PageSize,
@@ -134,6 +156,7 @@ namespace SampleApi.Controllers
                     return Url.Link("GetAuthors",
                         new
                         {
+                            fields = authorsResourceParameters.Fields,
                             orderBy = authorsResourceParameters.OrderBy,
                             pageNumber = authorsResourceParameters.PageNumber + 1,
                             pageSize = authorsResourceParameters.PageSize,
@@ -145,6 +168,7 @@ namespace SampleApi.Controllers
                     return Url.Link("GetAuthors",
                         new
                         {
+                            fields = authorsResourceParameters.Fields,
                             orderBy = authorsResourceParameters.OrderBy,
                             pageNumber = authorsResourceParameters.PageNumber,
                             pageSize = authorsResourceParameters.PageSize,
