@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Marvin.Cache.Headers;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
@@ -14,8 +15,12 @@ using System.Threading.Tasks;
 
 namespace SampleApi.Controllers
 {
-    [Route("api/authors/{authorId}/books")]
     [ApiController]
+    [Route("api/authors/{authorId}/books")]
+
+    [HttpCacheExpiration(CacheLocation = CacheLocation.Public)]
+    [HttpCacheValidation(MustRevalidate = true)]
+    //[ResponseCache(CacheProfileName = "240SecondsCacheProfile")]
     public class BooksController : ControllerBase
     {
         private readonly IBookRepository _bookRepository;
@@ -33,6 +38,8 @@ namespace SampleApi.Controllers
         }
 
         [HttpGet(Name = "GetBooksForAuthor")]
+        [HttpCacheExpiration(CacheLocation = CacheLocation.Public, MaxAge =1000)]
+       // [ResponseCache(Duration = 120)]
         public async Task<ActionResult<IEnumerable<BookDto>>> GetBooks(
         Guid authorId)
         {
