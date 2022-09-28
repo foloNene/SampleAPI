@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Net.Http.Headers;
 using SampleApi.ActionConstraints;
@@ -17,6 +18,10 @@ namespace SampleApi.Controllers
 {
     [Route("api/authors")]
     [ApiController]
+    [Produces("application/json", "application/xml")]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status406NotAcceptable)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public class AuthorsController : ControllerBase
     {
         private readonly IAuthorRepository _authorsRepository;
@@ -40,7 +45,11 @@ namespace SampleApi.Controllers
 
         }
 
+
         [HttpGet(Name ="GetAuthors")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesDefaultResponseType]
         public IActionResult GetAuthors(
             [FromQuery]AuthorsResourceParameters authorsResourceParameters)
         {
@@ -97,6 +106,13 @@ namespace SampleApi.Controllers
             return Ok(linkedCollectionResource);
         }
 
+        /// <summary>
+        /// Get an author by ID
+        /// </summary>
+        /// <param name="authorId"></param>
+        /// <param name="fields"></param>
+        /// <param name="mediaType"></param>
+        /// <returns>An author details are returned </returns>
         [Produces("application/json",
             "application/vnd.marvin.hateoas+json",
             "application/vnd.marvin.author.full+json",
@@ -104,6 +120,10 @@ namespace SampleApi.Controllers
             "application/vnd.marvin.author.friendly+json",
             "application/vnd.marvin.author.friendly.hateoas+json")]
         [HttpGet("{authorId}", Name ="GetAuthor")]
+
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesDefaultResponseType]
         public async Task<ActionResult<Author>> GetAuthor(Guid authorId, string fields,
             [FromHeader(Name = "Accept")] string mediaType)
         {
@@ -171,11 +191,14 @@ namespace SampleApi.Controllers
             
         }
 
-        //Author with date of death.
+       // Author with date of death.
         [HttpPost(Name = "CreateAuthorWithDateOfDeath")]
         [RequestHeaderMatchesMediaType("Content-Type",
             "application/vnd.marvin.authorforcreationwithdateofdeath+json")]
-        
+
+       // [Produces("application/vnd.marvin.authorforcreationwithdateofdeath+json")]
+
+        [ApiExplorerSettings(IgnoreApi = true)]
         public async Task<ActionResult<AuthorDto>> CreateAuthorWithDateOfDeath(
              AuthorForCreationWithDateOfDeathDto author)
         {

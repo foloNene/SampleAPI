@@ -13,6 +13,7 @@ namespace SampleApi.Controllers
 {
     [ApiController]
     [Route("api/authorcollections")]
+    [ApiConventionType(typeof(DefaultApiConventions))]
     public class AuthorCollectionsController : ControllerBase
     {
         private readonly IAuthorRepository _authorsRepository;

@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Marvin.Cache.Headers;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
@@ -18,9 +19,16 @@ namespace SampleApi.Controllers
     [ApiController]
     [Route("api/authors/{authorId}/books")]
 
+
+
     [HttpCacheExpiration(CacheLocation = CacheLocation.Public)]
     [HttpCacheValidation(MustRevalidate = true)]
     //[ResponseCache(CacheProfileName = "240SecondsCacheProfile")]
+   // [Produces("application/json", "application/xml")]
+
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status406NotAcceptable)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public class BooksController : ControllerBase
     {
         private readonly IBookRepository _bookRepository;
@@ -39,7 +47,10 @@ namespace SampleApi.Controllers
 
         [HttpGet(Name = "GetBooksForAuthor")]
         [HttpCacheExpiration(CacheLocation = CacheLocation.Public, MaxAge =1000)]
-       // [ResponseCache(Duration = 120)]
+       
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        // [ResponseCache(Duration = 120)]
         public async Task<ActionResult<IEnumerable<BookDto>>> GetBooks(
         Guid authorId)
         {
@@ -53,6 +64,8 @@ namespace SampleApi.Controllers
         }
 
         [HttpGet("{bookId}", Name = "GetBookForAuthor")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<BookDto>> GetBook(
              Guid authorId,
              Guid bookId)
@@ -72,6 +85,10 @@ namespace SampleApi.Controllers
         }
 
         [HttpPost(Name = "CreateBookForAuthor")]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        //[ProducesResponseType(StatusCodes.Status404NotFound)]
+        //[ProducesResponseType(StatusCodes.Status422UnprocessableEntity,
+        //    Type = typeof(Microsoft.AspNetCore.Mvc.ModelBinding.ModelStateDictionary))]
         public async Task<ActionResult<BookDto>> CreateBookForAuthor(
             Guid authorId, BookForCreationDto book)
         {
@@ -117,6 +134,24 @@ namespace SampleApi.Controllers
             return NoContent();
         }
 
+        /// <summary>
+        /// Partailly Update an Author with book
+        /// </summary>
+        /// <param name="authorId"></param>
+        /// <param name="bookId"></param>
+        /// <param name="patchDocument"></param>
+        /// <returns></returns>
+        /// <remarks>
+        /// Sample request (this request update the **author's details** 
+        /// PATCH /authors/id       
+        /// [
+        ///     {       
+        ///         "op" : "replace,             
+        ///        "path" : "/firstname",              
+        ///        "value": "new first name                      
+        ///     }
+        /// ]
+        /// </remarks>
         [HttpPatch("{bookId}")]
         public async Task <IActionResult> PartiallyUpdateBookForauthor(Guid authorId, Guid bookId, JsonPatchDocument<BookForUpdateDto> patchDocument)
         {

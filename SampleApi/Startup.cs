@@ -11,10 +11,13 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Serialization;
 using SampleApi.Contexts;
+using SampleApi.OperationFilters;
 using SampleApi.Services;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 
 namespace SampleApi
@@ -113,7 +116,37 @@ namespace SampleApi
             var connectionString = Configuration["ConnectionStrings:SampleApiDBConnectionString"];
             services.AddDbContext<LibraryContext>(o => o.UseSqlServer(connectionString));
 
-           
+
+            services.AddSwaggerGen(setupAction =>
+            {
+                setupAction.SwaggerDoc("SampleAPIOpenAPISpecification", 
+                    new Microsoft.OpenApi.Models.OpenApiInfo()
+                {
+                        Title = "Sample API",
+                        Version = "1",
+                        Description = "Through this API you can access authors and their books.",
+                        Contact = new Microsoft.OpenApi.Models.OpenApiContact()
+                        {
+                            Email = "olaideadebanjo@gmail.com",
+                            Name = "Olaide Adebanjo",
+                            Url = new Uri("https://www.twitter.com/olaideadebanjo")
+                        },
+                        License  = new Microsoft.OpenApi.Models.OpenApiLicense()
+                        {
+                            Name = "MLT License",
+                            Url = new Uri("https://opensource.org/licenses/MIT")
+                        },
+                        
+                });
+
+                setupAction.OperationFilter<CreateAuthorOperationFilter>();
+                var xmlCommentsFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+                var xmlCommentsFullPath = Path.Combine(AppContext.BaseDirectory, xmlCommentsFile);
+
+                setupAction.IncludeXmlComments(xmlCommentsFullPath);
+
+                 
+            });
 
             
         }
@@ -138,11 +171,27 @@ namespace SampleApi
                 });
             }
 
-           // app.UseResponseCaching();
+            // app.UseResponseCaching();
+
+            //app.UseHttpsRedirection();
+
+            app.UseSwagger();
+
+            app.UseSwaggerUI(setupAction =>
+            {
+                setupAction.SwaggerEndpoint(
+                    "/swagger/SampleAPIOpenAPISpecification/swagger.json",
+                    "Sample API");
+
+                setupAction.RoutePrefix = "";
+
+            });
+
 
             app.UseHttpCacheHeaders();
 
             app.UseRouting();
+
 
             app.UseAuthorization();
 
